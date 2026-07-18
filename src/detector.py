@@ -11,6 +11,14 @@ class AnomalyDetector:
         self.icmp_activity = defaultdict(list) #icmp detection
         self.packet_times = []     #traffic spike detection count the number of packets
 
+
+        
+        # State tracking for active alerts to prevent spamming
+        self.active_port_scans = set()
+        self.active_syn_floods = set()
+        self.active_icmp_floods = set()
+        self.traffic_spike_active = False
+
         # Detection settings
         self.PORT_SCAN_THRESHOLD = 10      # More than 10 ports
         self.SYN_THRESHOLD = 50            # More than 50 SYN packets
@@ -47,14 +55,22 @@ class AnomalyDetector:
 
         # Check if threshold exceeded
         if len(unique_ports) > self.PORT_SCAN_THRESHOLD:
-            return {
-                "attack": "Port Scan",
-                "severity": "High",
-                "message": (
-                    f"{src_ip} scanned {len(unique_ports)} ports "
-                    f"in {self.TIME_WINDOW.seconds} seconds"
-                )
-            }
+
+            if src_ip not in self.active_port_scans:
+                self.active_port_scans.add(src_ip)
+                return {
+                    "attack": "Port Scan",
+                    "severity": "High",
+                    "message": (
+                        f"{src_ip} scanned {len(unique_ports)} ports "
+                        f"in {self.TIME_WINDOW.seconds} seconds"
+                    )
+                }
+            return None
+        else:
+            if src_ip in self.active_port_scans:
+                self.active_port_scans.remove(src_ip)
+
 
         return None
 
@@ -79,14 +95,21 @@ class AnomalyDetector:
         syn_count = len(self.syn_activity[src_ip])
 
         if syn_count > self.SYN_THRESHOLD:
-            return {
-                "attack": "SYN Flood",
-                "severity": "Critical",
-                "message": (
-                    f"{src_ip} sent {syn_count} SYN packets "
-                    f"in {self.TIME_WINDOW.seconds} seconds"
-                )
-            }
+
+            if src_ip not in self.active_syn_floods:
+                self.active_syn_floods.add(src_ip)
+                return {
+                    "attack": "SYN Flood",
+                    "severity": "Critical",
+                    "message": (
+                        f"{src_ip} sent {syn_count} SYN packets "
+                        f"in {self.TIME_WINDOW.seconds} seconds"
+                    )
+                }
+            return None
+        else:
+            if src_ip in self.active_syn_floods:
+                self.active_syn_floods.remove(src_ip)
 
         return None
     def detect_icmp_flood(self, src_ip):
@@ -110,14 +133,21 @@ class AnomalyDetector:
         icmp_count = len(self.icmp_activity[src_ip])
 
         if icmp_count > self.ICMP_THRESHOLD:
-            return {
-                "attack": "ICMP Flood",
-                "severity": "Medium",
-                "message": (
-                    f"{src_ip} sent {icmp_count} ICMP packets "
-                    f"in {self.TIME_WINDOW.seconds} seconds"
-                )
-            }
+
+            if src_ip not in self.active_icmp_floods:
+                self.active_icmp_floods.add(src_ip)
+                return {
+                    "attack": "ICMP Flood",
+                    "severity": "Medium",
+                    "message": (
+                        f"{src_ip} sent {icmp_count} ICMP packets "
+                        f"in {self.TIME_WINDOW.seconds} seconds"
+                    )
+                }
+            return None
+        else:
+            if src_ip in self.active_icmp_floods:
+                self.active_icmp_floods.remove(src_ip)
 
         return None
 
@@ -141,13 +171,19 @@ class AnomalyDetector:
         packet_count = len(self.packet_times)
 
         if packet_count > self.TRAFFIC_SPIKE_THRESHOLD:
-            return {
-                "attack": "Traffic Spike",
-                "severity": "Medium",
-                "message": (
-                    f"Network traffic reached {packet_count} packets "
-                    f"in {self.TIME_WINDOW.seconds} seconds"
-                )
-            }
+
+            if not self.traffic_spike_active:
+                self.traffic_spike_active = True
+                return {
+                    "attack": "Traffic Spike",
+                    "severity": "Medium",
+                    "message": (
+                        f"Network traffic reached {packet_count} packets "
+                        f"in {self.TIME_WINDOW.seconds} seconds"
+                    )
+                }
+            return None
+        else:
+            self.traffic_spike_active = False
 
         return None
