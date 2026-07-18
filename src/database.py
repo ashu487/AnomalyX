@@ -80,7 +80,34 @@ def get_packets():
 
     return packets
 
+def get_latest_packets(limit=100):
+    conn = connect_db()
+    conn.row_factory = lambda c, r: dict(zip([col[0] for col in c.description], r))
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM packets ORDER BY id DESC LIMIT ?', (limit,))
+    res = cursor.fetchall()
+    conn.close()
+    return res
+
+def get_protocol_counts():
+    conn = connect_db()
+    conn.row_factory = lambda c, r: dict(zip([col[0] for col in c.description], r))
+    cursor = conn.cursor()
+    cursor.execute('SELECT protocol, COUNT(*) as count FROM packets GROUP BY protocol')
+    res = cursor.fetchall()
+    conn.close()
+    return res
+
+def get_total_count():
+    conn = connect_db()
+    conn.row_factory = lambda c, r: dict(zip([col[0] for col in c.description], r))
+    cursor = conn.cursor()
+    cursor.execute('SELECT COUNT(*) as total FROM packets')
+    result = cursor.fetchone()
+    conn.close()
+    return result['total'] if result else 0
+
 if __name__ == "__main__":
     create_database()
     
-     print("Database initialized successfully!")
+    print("Database initialized successfully!")

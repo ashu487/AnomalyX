@@ -1,0 +1,11 @@
+# Network packet manipulation and sniffing 
+# NOTE: Running packet capture via Scapy requires elevated privileges.
+# On Windows, you need to run as Administrator.
+# On Linux/macOS, use sudo.
+scapy==2.5.0
+
+# Web framework for API endpoints
+Flask==3.0.0
+
+# Cross-Origin Resource Sharing (CORS) support for Flask
+Flask-Cors==4.0.0
