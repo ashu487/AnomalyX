@@ -8,7 +8,7 @@ import sys
 
 import config
 import database
-import packet_capture as capture
+import capture
 from api import start_api
 from detector import AnomalyDetector
 

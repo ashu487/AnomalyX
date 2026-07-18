@@ -21,10 +21,10 @@ class AnomalyDetector:
 
         # Detection settings
         self.PORT_SCAN_THRESHOLD = 10      # More than 10 ports
-        self.SYN_THRESHOLD = 50            # More than 50 SYN packets
+        self.SYN_THRESHOLD = 50           # More than 50 SYN packets
         self.TIME_WINDOW = timedelta(seconds=10)   # Within 10 seconds
-        self.ICMP_THRESHOLD = 100 #100 icmp packets
-        self.TRAFFIC_SPIKE_THRESHOLD = 200 #more than 200 packets in 10 seconds raise alert
+        self.ICMP_THRESHOLD = 5 #100 icmp packets //CHANGEEEE AGAIN TO 100
+        self.TRAFFIC_SPIKE_THRESHOLD = 30 #more than 200 packets in 10 seconds raise alert
 
     def detect_port_scan(self, src_ip, dst_port):
         """
@@ -54,7 +54,7 @@ class AnomalyDetector:
         }
 
         # Check if threshold exceeded
-        if len(unique_ports) > self.PORT_SCAN_THRESHOLD:
+        if len(unique_ports) >= self.PORT_SCAN_THRESHOLD:
 
             if src_ip not in self.active_port_scans:
                 self.active_port_scans.add(src_ip)
@@ -94,7 +94,7 @@ class AnomalyDetector:
         # Count SYN packets
         syn_count = len(self.syn_activity[src_ip])
 
-        if syn_count > self.SYN_THRESHOLD:
+        if syn_count >= self.SYN_THRESHOLD:
 
             if src_ip not in self.active_syn_floods:
                 self.active_syn_floods.add(src_ip)
@@ -131,8 +131,7 @@ class AnomalyDetector:
 
         # Count ICMP packets
         icmp_count = len(self.icmp_activity[src_ip])
-
-        if icmp_count > self.ICMP_THRESHOLD:
+        if icmp_count >= self.ICMP_THRESHOLD:
 
             if src_ip not in self.active_icmp_floods:
                 self.active_icmp_floods.add(src_ip)

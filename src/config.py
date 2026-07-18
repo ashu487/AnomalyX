@@ -3,7 +3,7 @@ Configuration settings for the Network Traffic Analyzer.
 """
 # Network interface to sniff on. 
 # Set to a specific interface name (e.g., 'eth0', 'wlan0', 'Ethernet') or None to use Scapy's default.
-INTERFACE = None
+INTERFACE = "Intel(R) Wi-Fi 6 AX200 160MHz"
 
 import os
 # Point directly to the AnomalyX database so the machine learning models can read the packets!
