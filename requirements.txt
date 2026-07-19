@@ -9,3 +9,10 @@ Flask==3.0.0
 
 # Cross-Origin Resource Sharing (CORS) support for Flask
 Flask-Cors==4.0.0
+
+# Dashboard (Member 2)
+streamlit==1.38.0
+streamlit-autorefresh==1.0.1
+plotly==5.24.1
+requests==2.32.3
+pandas==2.2.3
